@@ -1,0 +1,118 @@
+﻿<Window x:Class="UdgChallenge.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UdgChallenge.View"
+        xmlns:viewModel="clr-namespace:UdgChallenge.ViewModel" 
+        xmlns:control="clr-namespace:UdgChallenge.Control" 
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf" 
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors" 
+        mc:Ignorable="d" 
+        Title="UDG Frontend Junior Code Challenge 1" 
+        Width="1280" Height="720">
+    <Window.DataContext>
+        <viewModel:MainViewModel />
+    </Window.DataContext>
+    <i:Interaction.Triggers>
+        <!-- Neat and tidy way of handling events via view model -->
+        <i:EventTrigger EventName="Closing">
+            <i:CallMethodAction TargetObject="{Binding}" MethodName="WindowClosing"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0">
+            <Menu.Style>
+                <Style TargetType="Menu">
+                    <Setter Property="Padding" Value="5" />
+                </Style>
+            </Menu.Style>
+            <Menu.ItemContainerStyle>
+                <Style TargetType="MenuItem">
+                    <Setter Property="Padding" Value="10,0" />
+                </Style>
+            </Menu.ItemContainerStyle>
+            <MenuItem Header="File">
+                <MenuItem Header="Open" Command="{Binding OpenFileCommand}" />
+                <MenuItem Header="New" Command="{Binding NewFileCommand}" />
+                <MenuItem Header="Save" Command="{Binding SaveFileCommand}" IsEnabled="{Binding HasCurrentFile}" />
+                <MenuItem Header="Save As..." Command="{Binding SaveFileAsCommand}" IsEnabled="{Binding HasCurrentFile}" />
+                <MenuItem Header="Close" Command="{Binding CloseFileCommand}" IsEnabled="{Binding HasCurrentFile}" />
+                <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}" />
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="Add Row" Command="{Binding AddRowCommand}" IsEnabled="{Binding HasCurrentFile}" />
+                <MenuItem Header="Duplicate Rows" Command="{Binding DuplicateRowsCommand}" IsEnabled="{Binding HasSelection}" />
+                <MenuItem Header="Remove Rows" Command="{Binding RemoveRowsCommand}" IsEnabled="{Binding HasSelection}" />
+                <MenuItem Header="Clear Rows" Command="{Binding ClearRowsCommand}" IsEnabled="{Binding HasSelection}" />
+                <MenuItem Header="Clear All Rows" Command="{Binding ClearAllRowsCommand}" IsEnabled="{Binding HasCurrentFile}" />
+            </MenuItem>
+            <MenuItem Header="View">
+                <MenuItem Header="Visualization" IsCheckable="True" IsChecked="{Binding ShowVisualization}" />
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition>
+                    <ColumnDefinition.Style>
+                        <Style TargetType="ColumnDefinition">
+                            <Setter Property="Width" Value="256" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowVisualization}" Value="False">
+                                    <Setter Property="Width" Value="0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ColumnDefinition.Style>
+                </ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <control:ExtendedDataGrid 
+                Grid.Column="0"
+                ItemsSource="{Binding CurrentFile.DataTable.DefaultView}" 
+                SelectedItems="{Binding SelectedItems, Mode=TwoWay}" 
+                EnableRowVirtualization="True" 
+                MaxColumnWidth="600" 
+                CanUserAddRows="False">
+                <DataGrid.Resources>
+                    <ContextMenu x:Key="rowContextMenu" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext}">
+                        <MenuItem Header="Duplicate Rows" Command="{Binding DuplicateRowsCommand}" />
+                        <MenuItem Header="Remove Rows" Command="{Binding RemoveRowsCommand}" />
+                        <MenuItem Header="Clear Rows" Command="{Binding ClearRowsCommand}" />
+                    </ContextMenu>
+                    <ContextMenu x:Key="columnHeaderContextMenu" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext}">
+                        <MenuItem Header="Edit Columns..." Command="{Binding EditColumnsCommand}" IsEnabled="False" /> <!-- known broken -->
+                    </ContextMenu>
+                </DataGrid.Resources>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="ContextMenu" Value="{StaticResource rowContextMenu}"/>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="ContextMenu" Value="{StaticResource columnHeaderContextMenu}"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+            </control:ExtendedDataGrid>
+            <Grid Grid.Column="1">
+                <TabControl ItemsSource="{Binding PieSeriesCollections}" Margin="5,0,0,0">
+                    <TabControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name, FallbackValue=Chart}" />
+                        </DataTemplate>
+                    </TabControl.ItemTemplate>
+                    <TabControl.ContentTemplate>
+                        <DataTemplate>
+                            <lvc:PieChart LegendLocation="Bottom" Hoverable="False" DataTooltip="{x:Null}" Series="{Binding}" DisableAnimations="True" />
+                        </DataTemplate>
+                    </TabControl.ContentTemplate>
+                </TabControl>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

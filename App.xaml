@@ -1,0 +1,12 @@
+﻿<Application x:Class="UdgChallenge.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:UdgChallenge" 
+             xmlns:view="clr-namespace:UdgChallenge.View" 
+             ShutdownMode="OnMainWindowClose">
+    <Application.Resources>
+    </Application.Resources>
+    <Application.MainWindow>
+        <view:MainWindow Visibility="Visible" />
+    </Application.MainWindow>
+</Application>
